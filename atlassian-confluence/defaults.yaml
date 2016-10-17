@@ -2,6 +2,7 @@ atlassian-confluence:
   version: 5.10.6
   dir: /opt/atlassian/confluence
   ajp_port: 8009
+  http_port: 8080
   user: confluence
   group: confluence
   crowdSSO: false

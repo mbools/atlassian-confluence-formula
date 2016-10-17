@@ -3,6 +3,7 @@
 include:
   - java
 
+
 confluence:
   file.managed:
     - name: /etc/systemd/system/atlassian-confluence.service
@@ -41,19 +42,12 @@ confluence-graceful-down:
     - prereq:
       - file: confluence-install
 
-{% if confluence.download %}
-confluence-download:
-  cmd.run:
-    - name: "curl -L --silent '{{ confluence.url }}' > '{{ confluence.source }}'"
-    - unless: "test -f '{{ confluence.source }}'"
-    - prereq:
-      - archive: confluence-install
-{% endif %}
 
 confluence-install:
   archive.extracted:
     - name: {{ confluence.dirs.extract }}
-    - source: {{ confluence.source }}
+    - source: {{ confluence.url }}
+    - source_hash: {{ confluence.url_hash }}
     - archive_format: tar
     - tar_options: z
     - if_missing: {{ confluence.dirs.current_install }}
@@ -62,6 +56,8 @@ confluence-install:
     - keep: True
     - require:
       - file: confluence-extractdir
+
+
 
   file.symlink:
     - name: {{ confluence.dirs.install }}
@@ -154,10 +150,9 @@ confluence-crowd-properties:
 {%- endfor %}
 {% endif %}
 
-{% for chmoddir in ['bin', 'work', 'temp', 'logs'] %}
-confluence-permission-{{ chmoddir }}:
+confluence-permission-installdir:
   file.directory:
-    - name: {{ confluence.dirs.install }}/{{ chmoddir }}
+    - name: {{ confluence.dirs.install }}
     - user: {{ confluence.user }}
     - group: {{ confluence.group }}
     - recurse:
@@ -167,7 +162,6 @@ confluence-permission-{{ chmoddir }}:
       - file: confluence-install
     - require_in:
       - service: confluence
-{% endfor %}
 
 confluence-disable-ConfluenceAuthenticator:
   file.replace:

@@ -1,15 +1,18 @@
 <Server port="8000" shutdown="SHUTDOWN" debug="0">
     <Service name="Tomcat-Standalone">
-{% if config.get('ajp_port') %}
-        <Connector port="{{ config.ajp_port }}" enableLookups="false" protocol="AJP/1.3" URIEncoding="UTF-8"/>
-{% endif %}
+        <Connector port="{{ config.ajp_port }}"
+		{%- if 'address' in config %}
+		address="{{ config.address }}"
+		{%- endif %}
+			enableLookups="false" protocol="AJP/1.3" URIEncoding="UTF-8"/>
 
-{% if config.get('http_port') %}
         <Connector port="{{ config.http_port }}" connectionTimeout="20000" redirectPort="8443"
+		{%- if 'address' in config %}
+		address="{{ config.address }}"
+		{% endif %}
                 maxThreads="48" minSpareThreads="10"
                 enableLookups="false" acceptCount="10" debug="0" URIEncoding="UTF-8"
                 protocol="org.apache.coyote.http11.Http11NioProtocol" />
-{% endif %}
 
         <Engine name="Standalone" defaultHost="localhost" debug="0">
 
@@ -46,4 +49,3 @@
 -->
     </Service>
 </Server>
-
